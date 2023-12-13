@@ -1,0 +1,57 @@
+EX3.1 
+#include <stdio.h>
+A[n][m]
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Fonction pour allouer dynamiquement une matrice
+double** alloc_matrix(int rows, int cols) {
+    double** matrix = (double**)malloc(rows * sizeof(double*));
+    if (matrix == NULL) {
+        perror("Allocation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < rows; ++i) {
+        matrix[i] = (double*)malloc(cols * sizeof(double));
+        if (matrix[i] == NULL) {
+            perror("Allocation failed");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    return matrix;
+}
+
+// Fonction pour libérer la mémoire de la matrice
+void free_matrix(double** matrix, int rows) {
+    for (int i = 0; i < rows; ++i) {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+int main() {
+    int m = 3; // nombre de lignes
+    int n = 4; // nombre de colonnes
+
+    // Allocation dynamique de la matrice
+    double** A = alloc_matrix(m, n);
+
+    // Utilisation de la matrice...
+
+    // Libération de la mémoire
+    free_matrix(A, m);
+
+    return 0;
+}
+3.2
+LAPACK_COL_MAJOR est une constante utilisée pour spécifier l'ordre de disposition des éléments d'une matrice en mémoire. 
+LAPACK_COL_MAJOR indique que la matrice est stockée de manière à privilégier les colonnes, c'est-à-dire en mode « colonne principale ».
+3.3
+La dimension principale correspond à la distance (en nombre d'éléments) entre les débuts successifs des colonnes (pour une disposition column-major, comme LAPACK_COL_MAJOR) ou des lignes (pour une disposition row-major) dans la mémoire.
+A[n][m] disposition column-major Id=m
+	disposition row-major    Id=n
+3.4
+
