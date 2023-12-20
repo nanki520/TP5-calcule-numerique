@@ -54,4 +54,20 @@ La dimension principale correspond à la distance (en nombre d'éléments) entre
 A[n][m] disposition column-major Id=m
 	disposition row-major    Id=n
 3.4
+dgbmv Y = alpha * A * X + beta * Y，effectue une multiplication de matrice par vecteur généralisée pour une matrice bande
+
+3.5
+Dgbtrf  effectuer une décomposition en matrices LU d'une matrice à bande.
+	A=PLU
+3.6
+
+La fonction LAPACK dgbtrs est utilisée pour résoudre un système linéaire de la forme 
+A*X=B
+A est une matrice générale, 
+X est une matrice inconnue
+B est une matrice de termes constants.
+
+3.7
+
+3.8
 
