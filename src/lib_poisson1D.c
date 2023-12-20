@@ -57,7 +57,10 @@ void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* 
 }
 
 void set_grid_points_1D(double* x, int* la){
-    
+    for (int i = 0; i < *la; ++i)
+      {
+          float x[i] = i / (*la - 1);
+      }
     
 }
 
