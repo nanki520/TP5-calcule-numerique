@@ -6,159 +6,107 @@
 #include "lib_poisson1D.h"
 
 void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv){
-    for (int j=0;j<(*lab)*(*la);j++){
-        AB[j]=1;
-        }
-    for (int j=0;j<(*lab);j++){
-        AB[(*kv)+(*la)*j]=-2;
-        }
-    for(int i=0;i<(*kv);i++){
-        for(int j=0;j+i<(*kv);j++){
-            AB[(*la*j)+i]=0;
-        }
+  int ii, jj, kk;
+  for (jj=0;jj<(*la);jj++){
+    kk = jj*(*lab);
+    if (*kv>=0){
+      for (ii=0;ii< *kv;ii++){
+	AB[kk+ii]=0.0;
+      }
     }
-    for(int i=(*la)-(*kv);i<(*la);i++){
-        
-        for(int j=(*lab)-(*kv);j<(*lab);j++){
-            if((*lab)+(*la)-(j+i)<(*kv)+2){
-                AB[(*la)*j+i]=0;
-            }
-            
-        }
-    }
-    
+    AB[kk+ *kv]=-1.0;
+    AB[kk+ *kv+1]=2.0;
+    AB[kk+ *kv+2]=-1.0;
+  }
+  AB[0]=0.0;
+  if (*kv == 1) {AB[1]=0;}
+  
+  AB[(*lab)*(*la)-1]=0.0;
 }
 
-
 void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *kv){
-    for (int j=0;j<(*lab)*(*la);j++){
-        AB[j]=0;
-        }
-    for (int j=0;j<(*lab);j++){
-        AB[(*kv)+(*la)*j]=1;
-        }
+  int ii, jj, kk;
+  for (jj=0;jj<(*la);jj++){
+    kk = jj*(*lab);
+    if (*kv>=0){
+      for (ii=0;ii< *kv;ii++){
+	AB[kk+ii]=0.0;
+      }
+    }
+    AB[kk+ *kv]=0.0;
+    AB[kk+ *kv+1]=1.0;
+    AB[kk+ *kv+2]=0.0;
+  }
+  AB[1]=0.0;
+  AB[(*lab)*(*la)-1]=0.0;
 }
 
 void set_dense_RHS_DBC_1D(double* RHS, int* la, double* BC0, double* BC1){
-
-      for (int i = 1; i < (*la)-1 ; ++i){
-          RHS[i] = 0;
-      }
-      RHS[0] = *BC0;
-      RHS[(*la)-1] = *BC1;
-
-}
+  int jj;
+  RHS[0]= *BC0;
+  RHS[(*la)-1]= *BC1;
+  for (jj=1;jj<(*la)-1;jj++){
+    RHS[jj]=0.0;
+  }
+}  
 
 void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* BC0, double* BC1){
-    for (int i = 0; i < (*la) ; ++i){
-           EX_SOL[i] = *BC0 + X[i]*(*BC1 - *BC0);
-       }
-
-}
+  int jj;
+  double h, DELTA_T;
+  DELTA_T=(*BC1)-(*BC0);
+  for (jj=0;jj<(*la);jj++){
+    EX_SOL[jj] = (*BC0) + X[jj]*DELTA_T;
+  }
+}  
 
 void set_grid_points_1D(double* x, int* la){
-    for (int i = 0; i < *la; ++i)
-      {
-          float x[i] = i / (*la - 1);
-      }
-    
-}
-
-void write_GB_operator_rowMajor_poisson1D(double* AB, int* lab, int* la, char* filename){
-  FILE * file;
-  int ii,jj;
-  file = fopen(filename, "w");
-  //Numbering from 1 to la
-  if (file != NULL){
-    for (ii=0;ii<(*lab);ii++){
-      for (jj=0;jj<(*la);jj++){
-	fprintf(file,"%lf\t",AB[ii*(*la)+jj]);
-      }
-      fprintf(file,"\n");
-    }
-    fclose(file);
-  }
-  else{
-    perror(filename);
-  }
-}
-
-void write_GB_operator_colMajor_poisson1D(double* AB, int* lab, int* la, char* filename){
-  FILE * file;
-  int ii,jj;
-  file = fopen(filename, "w");
-  //Numbering from 1 to la
-  if (file != NULL){
-    for (ii=0;ii<(*la);ii++){
-      for (jj=0;jj<(*lab);jj++){
-	fprintf(file,"%lf\t",AB[ii*(*lab)+jj]);
-      }
-      fprintf(file,"\n");
-    }
-    fclose(file);
-  }
-  else{
-    perror(filename);
-  }
-}
-
-void write_GB2AIJ_operator_poisson1D(double* AB, int* la, char* filename){
-  FILE * file;
   int jj;
-  file = fopen(filename, "w");
-  //Numbering from 1 to la
-  if (file != NULL){
-    for (jj=1;jj<(*la);jj++){
-      fprintf(file,"%d\t%d\t%lf\n",jj,jj+1,AB[(*la)+jj]);
-    }
-    for (jj=0;jj<(*la);jj++){
-      fprintf(file,"%d\t%d\t%lf\n",jj+1,jj+1,AB[2*(*la)+jj]);
-    }
-    for (jj=0;jj<(*la)-1;jj++){
-      fprintf(file,"%d\t%d\t%lf\n",jj+2,jj+1,AB[3*(*la)+jj]);
-    }
-    fclose(file);
-  }
-  else{
-    perror(filename);
+  double h;
+  h=1.0/(1.0*((*la)+1));
+  for (jj=0;jj<(*la);jj++){
+    x[jj]=(jj+1)*h;
   }
 }
 
-void write_vec(double* vec, int* la, char* filename){
-  int jj;
-  FILE * file;
-  file = fopen(filename, "w");
-  // Numbering from 1 to la
-  if (file != NULL){
-    for (jj=0;jj<(*la);jj++){
-      fprintf(file,"%lf\n",vec[jj]);
+double relative_forward_error(double* x, double* y, int* la){
+    double z[*la];
+    int i;
+    for (i=0;i<(*la);i++){
+        z[i] =y[i] - x[i];
     }
-    fclose(file);
-  }
-  else{
-    perror(filename);
-  } 
-}  
-
-void write_xy(double* vec, double* x, int* la, char* filename){
-  int jj;
-  FILE * file;
-  file = fopen(filename, "w");
-  // Numbering from 1 to la
-  if (file != NULL){
-    for (jj=0;jj<(*la);jj++){
-      fprintf(file,"%lf\t%lf\n",x[jj],vec[jj]);
-    }
-    fclose(file);
-  }
-  else{
-    perror(filename);
-  } 
-}  
+    double y_norme= cblas_dnrm2(*la, y, 1);
+    double z_norme= cblas_dnrm2(*la, z, 1);
+  return z_norme/y_norme;
+}
 
 int indexABCol(int i, int j, int *lab){
-  return 0;
+  return j*(*lab)+i;
 }
-int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info){
-  return *info;
+
+int dgbtrftridiag(int *la, int *n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info) {
+    // 分别指向次对角线、主对角线和带上对角线的起始位置
+    double* upper = AB + 5;
+    double* main_diag = AB + 2;
+    double* lower = AB + 3;
+
+    for (int k = 0; k < *n - 1; k++) {
+        // 检查主对角线元素是否为零
+        if (main_diag[4 * k] == 0.0) {
+            fprintf(stderr, "La décomposition LU a échoué : les principaux éléments diagonaux sont nuls。\n");
+            exit(EXIT_FAILURE);
+        }
+        ipiv[k] = k + 1;  // Assuming 1-based indexing
+        // 计算乘数
+        double multiplier = lower[4 * k] / main_diag[4 * k];
+
+        // 更新下一行的元素
+        main_diag[4 * k + 4] -= multiplier * upper[4 * k];
+        lower[4 * k] = multiplier;
+    }
+
+    AB[4 * (*n) - 1] = 0;
+    *info = 0;
+
+    return *info;
 }
+
